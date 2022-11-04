@@ -1,0 +1,5 @@
+Main Features
+1. Show subjects for each school term
+2. Show subjects with grades for each term
+3. Enter grades for subjects recently finished
+4. Edit a course
