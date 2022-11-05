@@ -41,11 +41,11 @@ func Parse(csvFile *os.File) []Course {
 		if len(line) == 6 {
 			grade, _ := strconv.Atoi(line[5])
 			courses = append(courses,
-				*NewCourse(year, term, id, title, units, grade, "BSCS"))
+				*newCourse(year, term, id, title, units, grade, "BSCS"))
 		}
 
 		courses = append(courses,
-			*NewCourse(year, term, id, title, units, 0, "BSCS"))
+			*newCourse(year, term, id, title, units, 0, "BSCS"))
 	}
 	return courses
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 )
 
 // show subjects for each school term
@@ -87,6 +86,7 @@ func input(prompt string) string {
 		log.Fatal(err)
 	}
 
-	input = strings.Replace(input, "\r\n", "", -1)
+	// input = strings.Replace(input, "\r\n", "", -1)
+
 	return input
 }

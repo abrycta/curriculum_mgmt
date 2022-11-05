@@ -1,0 +1,9 @@
+Originally a:
+SELECT * FROM course
+
+Find this string:
+* FROM course
+
+Replace with:
+year, term, course.id, title, units, grade, d.degree FROM course JOIN degree d on d.id = course.degree
+

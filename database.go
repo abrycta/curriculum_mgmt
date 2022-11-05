@@ -48,12 +48,16 @@ func courses() ([]Course, error) {
 	// A course slice to hold data from the return values of the query
 	var courses []Course
 
-	rows, err := db.Query("SELECT year, term, course.id, title, units, grade, d.degree FROM course JOIN degree d on d.id = course.degree")
+	rows, err := db.Query("SELECT * FROM course")
 
 	if err != nil {
 		return nil, fmt.Errorf("courses: %v", err)
 	}
 
+	// wrap via closure
+	// closures are anonymous nested functions
+	// that have bindings to variables
+	// outside its lexical scope
 	defer rows.Close()
 
 	// Loop through rows, using Scan to assign column data to struct fields
@@ -61,6 +65,8 @@ func courses() ([]Course, error) {
 		var course Course
 		if err = rows.Scan(&course.Year, &course.Term, &course.Id, &course.Title, &course.Units, &course.Grade, &course.Degree); err != nil {
 			// alternative to coalce, handle null values
+			// Scan returns an error
+			// we pass pointers
 			rows.Scan(&course.Year, &course.Term, &course.Id, &course.Title, &course.Units, 0, &course.Degree)
 			// return nil, fmt.Errorf("courses: %v", err)
 		}
@@ -122,21 +128,21 @@ func edit() {
 }
 
 func searchByID(id string) bool {
-	var stmt, err = db.Prepare("SELECT year, term, course.id, title, units, grade, d.degree FROM course JOIN degree d on d.id = course.degree WHERE id = ?")
-	var tmp Course
+	var stmt, err = db.Prepare("SELECT * FROM course WHERE id = ?")
+	var banana Course // ???
 	if err != nil {
 		log.Fatal(err)
 	}
 	// multiple cursor
 	// err = stmt.QueryRow(id).Scan(&course.Year, &course.Term, &course.Id, &course.Title, &course.Units, &course.Grade)
-	err = stmt.QueryRow(id).Scan(&tmp.Year, &tmp.Term, &tmp.Id, &tmp.Title, &tmp.Units, &tmp.Grade, &tmp.Degree)
+	err = stmt.QueryRow(id).Scan(&banana.Year, &banana.Term, &banana.Id, &banana.Title, &banana.Units, &banana.Grade, &banana.Degree)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return false
 		}
 	}
-	header(tmp.Year, tmp.Term)
-	prettify(tmp)
+	header(banana.Year, banana.Term)
+	prettify(banana)
 	return true
 }
 
@@ -190,7 +196,7 @@ func grade() {
 }
 
 func curriculum(year, term int) {
-	stmt, err := db.Prepare("SELECT year, term, course.id, title, units, grade, d.degree FROM course JOIN degree d on d.id = course.degree WHERE year = ? AND term = ?")
+	stmt, err := db.Prepare("SELECT * FROM course WHERE year = ? AND term = ?")
 
 	if err != nil {
 		fmt.Println(err)
@@ -340,14 +346,14 @@ func electiveMenu() (int, *Course) {
 	tmp = input("Grade")
 	grade, _ = strconv.Atoi(tmp)
 
-	return choice, NewCourse(year, term, id, title, units, grade, "BSCS")
+	return choice, newCourse(year, term, id, title, units, grade, "BSCS")
 
 }
 
 func gradedCourses() {
 	var courses []Course
 
-	rows, err := db.Query("SELECT year, term, course.id, title, units, grade, d.degree FROM course JOIN degree d on d.id = course.degree WHERE grade IS NOT NULL AND grade > 0")
+	rows, err := db.Query("SELECT * FROM course WHERE grade IS NOT NULL AND grade > 0")
 
 	if err != nil {
 		fmt.Println(err)
@@ -447,5 +453,5 @@ func enroll() *Course {
 	tmp = input("Grade")
 	grade, _ = strconv.Atoi(tmp)
 
-	return NewCourse(year, term, id, title, units, grade, degree)
+	return newCourse(year, term, id, title, units, grade, degree)
 }
