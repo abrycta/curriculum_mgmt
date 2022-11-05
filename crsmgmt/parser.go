@@ -1,4 +1,4 @@
-package main
+package crsmgmt
 
 import (
 	"encoding/csv"
@@ -7,6 +7,9 @@ import (
 	"os"
 	"strconv"
 )
+
+// Old methods for CSV parsing
+// This file will be deleted in the demo
 
 // Open
 func Open(name string) *os.File {
@@ -18,7 +21,6 @@ func Open(name string) *os.File {
 }
 
 // Parse
-
 func Parse(csvFile *os.File) []Course {
 	var courses []Course
 	reader := csv.NewReader(csvFile)

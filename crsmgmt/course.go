@@ -1,5 +1,7 @@
-package main
+// Allows for the manipulation of courses via a management interface.
+package crsmgmt
 
+// A representation of the Course data structure
 type Course struct {
 	Year   int
 	Term   int
@@ -10,6 +12,7 @@ type Course struct {
 	Degree string
 }
 
+// Factory method for creating course objects
 func NewCourse(year int, term int, id string, title string, units int, grade int, degree string) *Course {
 	return &Course{Year: year, Term: term, Id: id, Title: title, Units: units, Grade: grade, Degree: degree}
 }

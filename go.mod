@@ -1,4 +1,4 @@
-module awesomeProject
+module curriculum_mgmt
 
 go 1.19
 

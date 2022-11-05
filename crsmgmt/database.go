@@ -1,4 +1,4 @@
-package main
+package crsmgmt
 
 import (
 	"database/sql"
@@ -9,13 +9,14 @@ import (
 	// _ "github.com/go-sql-driver/mysql"
 )
 
+// Stores a reference to the database handle
 var db *sql.DB
+
+// Errors returned by functions are assigned to this variable
 var err error
 
-// refactor to connect
-// original signature is
-// func config()
-func connect() {
+// Connects to the MariaDB back-end and stores a reference to the database handle for use with SQL transactions.
+func Connect() {
 	cfg := mysql.Config{
 		User:                 "root",
 		Passwd:               "",
@@ -42,7 +43,7 @@ func connect() {
 
 // returns a list of all courses
 // for the demo, show a redundant for loop
-// that takes the input of the parsed csv entries
+// that takes the Input of the parsed csv entries
 // for the profiling part
 func courses() ([]Course, error) {
 	// A course slice to hold data from the return values of the query
@@ -77,12 +78,12 @@ func courses() ([]Course, error) {
 	return courses, nil
 }
 
-// edits a specific course, usually a grade
-func edit() {
+// Interface for editing a course object
+func Edit() {
 	var choice int
 	var stmt *sql.Stmt
 	// verify if row exists
-	key := input("Search Key")
+	key := Input("Search Key")
 	if !searchByID(key) {
 		fmt.Println("Invalid search parameters.")
 		return
@@ -127,6 +128,7 @@ func edit() {
 	// call show()
 }
 
+// Validator function to check if a course with a matching ID exists
 func searchByID(id string) bool {
 	var stmt, err = db.Prepare("SELECT * FROM course WHERE id = ?")
 	var banana Course // ???
@@ -146,6 +148,7 @@ func searchByID(id string) bool {
 	return true
 }
 
+// Helper subroutine for the edit() function
 func editMenu() (int, string) {
 	var val int
 	var inputstr string
@@ -157,27 +160,26 @@ func editMenu() (int, string) {
 			"3. Units\n" +
 			"4. Degree\n" +
 			"5. Back\n")
-	inputstr = input("Choice")
+	inputstr = Input("Choice")
 	val, _ = strconv.Atoi(inputstr)
 	if val != 5 {
-		inputstr = input("Value")
+		inputstr = Input("Value")
 	}
 	return val, inputstr
 }
 
-// Possible scenario: dual pane
-// written using dual pane
-func grade() {
+// Provides an interface for appending grade properties to course objects.
+func Grade() {
 	var grade int
 	var tmp string
 	// verify if row exists
 	// can be used as another case for the multiple cursor function
-	key := input("Search Key")
+	key := Input("Search Key")
 	if !searchByID(key) {
 		fmt.Println("Invalid search parameters")
 		return
 	}
-	tmp = input("Grade")
+	tmp = Input("Grade")
 	grade, _ = strconv.Atoi(tmp)
 
 	stmt, err := db.Prepare("UPDATE course" +
@@ -195,7 +197,8 @@ func grade() {
 	}
 }
 
-func curriculum(year, term int) {
+// Displays the course checklist
+func Curriculum(year, term int) {
 	stmt, err := db.Prepare("SELECT * FROM course WHERE year = ? AND term = ?")
 
 	if err != nil {
@@ -220,15 +223,15 @@ func curriculum(year, term int) {
 	}
 
 	var tmp string
-	tmp = input("\nContinue? [y]es | custom [r]ange | [n]o")
+	tmp = Input("\nContinue? [y]es | custom [r]ange | [n]o")
 	if tmp == "r" {
-		tmp = input("Term")
+		tmp = Input("Term")
 		term, _ := strconv.Atoi(tmp)
 		if term == 1 || term == 2 || term == 3 {
-			tmp = input("Year")
+			tmp = Input("Year")
 			year, _ := strconv.Atoi(tmp)
 			if year == 1 || year == 2 || year == 3 || year == 4 {
-				curriculum(year, term)
+				Curriculum(year, term)
 			}
 		} else {
 			return
@@ -241,11 +244,11 @@ func curriculum(year, term int) {
 			if term == 2 && year == 4 {
 				return
 			}
-			curriculum(year, term+1)
+			Curriculum(year, term+1)
 		} else {
 			// reset term, start of new year
 			if year != 4 {
-				curriculum(year+1, 1)
+				Curriculum(year+1, 1)
 			} else {
 				return
 			}
@@ -255,7 +258,8 @@ func curriculum(year, term int) {
 	}
 }
 
-func elective() {
+// Interface for managing elective courses.
+func Elective() {
 	var courses []Course
 	var stmt *sql.Stmt
 	rows, err := db.Query("SELECT c.year, term, c.id, title, units, grade, d.degree FROM course c JOIN degree d on d.id = c. degree WHERE title LIKE 'Elect%' ORDER BY title")
@@ -300,7 +304,7 @@ func elective() {
 
 }
 
-// int is for the elective number
+// Helper method for the elective() function
 func electiveMenu() (int, *Course) {
 	var tmp string
 	var choice int
@@ -312,7 +316,7 @@ func electiveMenu() (int, *Course) {
 	var grade int
 	fmt.Println("\n1. Enroll in an Elective Class\n" +
 		"2. Back\n")
-	tmp = input("Choice")
+	tmp = Input("Choice")
 	choice, _ = strconv.Atoi(tmp)
 
 	if choice == 2 {
@@ -320,7 +324,7 @@ func electiveMenu() (int, *Course) {
 	}
 
 	// select an elective
-	tmp = input("\nSelect an Elective")
+	tmp = Input("\nSelect an Elective")
 	choice, _ = strconv.Atoi(tmp)
 
 	// modify the term
@@ -339,18 +343,19 @@ func electiveMenu() (int, *Course) {
 		term = 2
 	}
 
-	id = input("Course ID")
-	title = input("Descriptive Title")
-	tmp = input("Units")
+	id = Input("Course ID")
+	title = Input("Descriptive Title")
+	tmp = Input("Units")
 	units, _ = strconv.Atoi(tmp)
-	tmp = input("Grade")
+	tmp = Input("Grade")
 	grade, _ = strconv.Atoi(tmp)
 
 	return choice, newCourse(year, term, id, title, units, grade, "BSCS")
 
 }
 
-func gradedCourses() {
+// Returns a list of graded courses
+func GradedCourses() {
 	var courses []Course
 
 	rows, err := db.Query("SELECT * FROM course WHERE grade IS NOT NULL AND grade > 0")
@@ -374,7 +379,7 @@ func gradedCourses() {
 	}
 
 	if len(courses) == 0 {
-		_ = input("\nNo graded courses yet.\nPress any key to continue")
+		_ = Input("\nNo graded courses yet.\nPress any key to continue")
 	} else {
 		for _, crs := range courses {
 			prettify(crs)
@@ -382,11 +387,12 @@ func gradedCourses() {
 	}
 }
 
-func shift() {
+// Allows a user to credit courses taken from their previous degree program
+func Shift() {
 	var course Course
 	var courses []Course
 	var dgr int
-	degree := input("From what BS/A Degree?")
+	degree := Input("From what BS/A Degree?")
 	stmt, err := db.Prepare("INSERT INTO degree VALUES(NULL, ?)")
 
 	if err != nil {
@@ -410,7 +416,7 @@ func shift() {
 	for {
 		course = *enroll()
 		courses = append(courses, course)
-		if input("Add more courses [y] | [n]") == "n" {
+		if Input("Add more courses [y] | [n]") == "n" {
 			break
 		}
 	}
@@ -431,6 +437,7 @@ func shift() {
 
 }
 
+// Helper function for enrolling courses for the shift() function
 func enroll() *Course {
 	var tmp string
 	var year int
@@ -442,15 +449,15 @@ func enroll() *Course {
 	var degree string
 
 	fmt.Println("\nCrediting a course from previous degree program: \n")
-	tmp = input("Year")
+	tmp = Input("Year")
 	year, _ = strconv.Atoi(tmp)
-	tmp = input("Term")
+	tmp = Input("Term")
 	term, _ = strconv.Atoi(tmp)
-	id = input("Course ID")
-	title = input("Descriptive Title")
-	tmp = input("Units")
+	id = Input("Course ID")
+	title = Input("Descriptive Title")
+	tmp = Input("Units")
 	units, _ = strconv.Atoi(tmp)
-	tmp = input("Grade")
+	tmp = Input("Grade")
 	grade, _ = strconv.Atoi(tmp)
 
 	return newCourse(year, term, id, title, units, grade, degree)

@@ -1,4 +1,4 @@
-package main
+package crsmgmt
 
 import (
 	"bufio"
@@ -27,7 +27,7 @@ func show(courses *[]Course) {
 	}
 }
 
-// show courses subroutine for formatting
+// Prettifies the properties of a course object
 func prettify(course Course) {
 	// fmt.Println(course.Id, '\t', course.Title, '\t', course.Units, '\t', course.Grade)
 	if course.Grade == 0 {
@@ -37,6 +37,7 @@ func prettify(course Course) {
 	}
 }
 
+// Displays an attractive header with words instead of numbers as year and term representations.
 func header(year, term int) {
 	var yearStr, termStr string
 	switch year {
@@ -66,7 +67,7 @@ func header(year, term int) {
 	fmt.Println("======================================================================")
 }
 
-func menu() {
+func Menu() {
 	fmt.Println("\n1. My curriculum checklist")
 	fmt.Println("2. Show courses with grades")
 	fmt.Println("3. Input / Edit grades")
@@ -75,10 +76,8 @@ func menu() {
 	fmt.Println("6. Shift from a program, to the BSCS curriculum\n")
 }
 
-// possible demo for debugging
-// input from bufreader returns
-// a string with \r\n at the end
-func input(prompt string) string {
+// Helper function for accepting input from stdin and removing carriage returns and new line runes.
+func Input(prompt string) string {
 	fmt.Print(prompt, ": ")
 	reader := bufio.NewReader(os.Stdin)
 	input, err := reader.ReadString('\n')

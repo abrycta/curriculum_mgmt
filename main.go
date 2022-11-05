@@ -1,6 +1,7 @@
 package main
 
 import (
+	"curriculum_mgmt/crsmgmt"
 	"fmt"
 	"strconv"
 )
@@ -8,23 +9,23 @@ import (
 func main() {
 	// file := Open("res/bscs.csv")
 	// courses := Parse(file)
-	connect()
+	crsmgmt.Connect()
 	for {
-		menu()
-		choice, _ := strconv.Atoi(input("Choice"))
+		crsmgmt.Menu()
+		choice, _ := strconv.Atoi(crsmgmt.Input("Choice"))
 		switch choice {
 		case 1:
-			curriculum(1, 1)
+			crsmgmt.Curriculum(1, 1)
 		case 2:
-			gradedCourses()
+			crsmgmt.GradedCourses()
 		case 3:
-			grade()
+			crsmgmt.Grade()
 		case 4:
-			edit()
+			crsmgmt.Edit()
 		case 5:
-			elective()
+			crsmgmt.Elective()
 		case 6:
-			shift()
+			crsmgmt.Shift()
 		default:
 			fmt.Println("Invalid input.")
 			return
